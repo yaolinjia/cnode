@@ -54,12 +54,17 @@
         }
 
         .right {
-            height: 1000px;
+            height: 700px;
             background-color: #ccc;
         }
 
         .times {
             margin-left: auto;
+        }
+
+        .router-link-exact-active {
+            color: #fff;
+            background-color: #337ab7;
         }
     </style>
 </head>
@@ -74,8 +79,8 @@
     const bus = new Vue()
 
     //路由组件
-    const cnodeBoxAll = {
-        name: "cnodeBoxAll",
+    const cnodeBox = {
+        name: "cnodeBox",
         template: `
         <div class="row">
             <cnodeLeft :lists="lists"></cnodeLeft>
@@ -85,7 +90,8 @@
         data() {
             return {
                 lists: [],
-                curr: 0
+                curr: 0,
+                tab: ""
             }
         },
         methods: {
@@ -93,7 +99,8 @@
                 this.lists = []
                 axios.get("https://cnodejs.org/api/v1/topics", {
                     params: {
-                        limit: 20,
+                        tab: this.tab,
+                        limit: 15,
                         page: page
                     }
                 }).then(val => {
@@ -101,176 +108,38 @@
                 }).catch(err => console.log(err))
             },
 
+        },
+        watch: {
+            '$route'(to, from) {
+                this.tab = to.params.tab
+                this.getMsg()
+            }
         },
         created() {
             this.getMsg()
             bus.$on('getNum', val => this.getMsg(val))
         },
     }
-    const cnodeBoxGood = {
-        name: "cnodeBoxGood",
+
+    const cnodeDetails = {
         template: `
-        <div class="row">
-            <cnodeLeft :lists="lists"></cnodeLeft>
-            <cnodeRight></cnodeRight>
-		</div>
-        `,
+        <div>
+            <h2>{{items.title}}</h2>
+            <p v-html="items.content"></p>
+        </div>
+    `,
         data() {
             return {
-                lists: [],
-                curr: 0
+                items: {}
             }
         },
-        methods: {
-            getMsg(page = 1) {
-                this.lists = []
-                axios.get("https://cnodejs.org/api/v1/topics?tab=good", {
-                    params: {
-                        limit: 20,
-                        page: page
-                    }
-                }).then(val => {
-                    this.lists = val.data.data;
-                }).catch(err => console.log(err))
-            },
-
-        },
         created() {
-            this.getMsg()
-            bus.$on('getNum', val => this.getMsg(val))
-        },
-    }
-    const cnodeBoxShare = {
-        name: "cnodeBoxShare",
-        template: `
-        <div class="row">
-            <cnodeLeft :lists="lists"></cnodeLeft>
-            <cnodeRight></cnodeRight>
-		</div>
-        `,
-        data() {
-            return {
-                lists: [],
-                curr: 0
-            }
-        },
-        methods: {
-            getMsg(page = 1) {
-                this.lists = []
-                axios.get("https://cnodejs.org/api/v1/topics?tab=share", {
-                    params: {
-                        limit: 20,
-                        page: page
-                    }
-                }).then(val => {
-                    this.lists = val.data.data;
-                }).catch(err => console.log(err))
-            },
 
-        },
-        created() {
-            this.getMsg()
-            bus.$on('getNum', val => this.getMsg(val))
-        },
-    }
-    const cnodeBoxAsk = {
-        name: "cnodeBoxAsk",
-        template: `
-        <div class="row">
-            <cnodeLeft :lists="lists"></cnodeLeft>
-            <cnodeRight></cnodeRight>
-		</div>
-        `,
-        data() {
-            return {
-                lists: [],
-                curr: 0
-            }
-        },
-        methods: {
-            getMsg(page = 1) {
-                this.lists = []
-                axios.get("https://cnodejs.org/api/v1/topics?tab=ask", {
-                    params: {
-                        limit: 20,
-                        page: page
-                    }
-                }).then(val => {
-                    this.lists = val.data.data;
-                }).catch(err => console.log(err))
-            },
-
-        },
-        created() {
-            this.getMsg()
-            bus.$on('getNum', val => this.getMsg(val))
-        },
-    }
-    const cnodeBoxJob = {
-        name: "cnodeBoxJob",
-        template: `
-        <div class="row">
-            <cnodeLeft :lists="lists"></cnodeLeft>
-            <cnodeRight></cnodeRight>
-		</div>
-        `,
-        data() {
-            return {
-                lists: [],
-                curr: 0
-            }
-        },
-        methods: {
-            getMsg(page = 1) {
-                this.lists = []
-                axios.get("https://cnodejs.org/api/v1/topics?tab=job", {
-                    params: {
-                        limit: 20,
-                        page: page
-                    }
-                }).then(val => {
-                    this.lists = val.data.data;
-                }).catch(err => console.log(err))
-            },
-
-        },
-        created() {
-            this.getMsg()
-            bus.$on('getNum', val => this.getMsg(val))
-        },
-    }
-    const cnodeBoxMyJob = {
-        name: "cnodeBoxMyJob",
-        template: `
-        <div class="row">
-            <cnodeLeft :lists="lists"></cnodeLeft>
-            <cnodeRight></cnodeRight>
-		</div>
-        `,
-        data() {
-            return {
-                lists: [],
-                curr: 0
-            }
-        },
-        methods: {
-            getMsg(page = 1) {
-                this.lists = []
-                axios.get("https://cnodejs.org/api/v1/topics?tab=dev", {
-                    params: {
-                        limit: 20,
-                        page: page
-                    }
-                }).then(val => {
-                    this.lists = val.data.data;
-                }).catch(err => console.log(err))
-            },
-
-        },
-        created() {
-            this.getMsg()
-            bus.$on('getNum', val => this.getMsg(val))
-        },
+            axios.get("https://cnodejs.org/api/v1/topic/" + this.$route.params.id).then(val => {
+                this.items = val.data.data;
+                console.log(this.items);
+            }).catch(err => console.log(err))
+        }
     }
 
 
@@ -312,21 +181,22 @@
         name: "cnodeHeadNav",
         template: `
         <ul class="nav nav-pills">
-        <li role="presentation"><router-link to="all">全部</router-link></li> 
-        <li role="presentation"><router-link to="/good">精华</router-link></li> 
-        <li role="presentation"><router-link to="/share">分享</router-link></li> 
-        <li role="presentation"><router-link to="/ask">问答</router-link></li> 
-        <li role="presentation"><router-link to="/job">招聘</router-link></li> 
-        <li role="presentation"><router-link to="/myjob">客户端招聘</router-link></li>
+        <li @click="num=1" role="presentation" :class="{active:num==1}"><router-link to="/all">全部</router-link></li> 
+        <li @click="num=2" role="presentation" :class="{active:num==2}"><router-link to="/good">精华</router-link></li> 
+        <li @click="num=3" role="presentation" :class="{active:num==3}"><router-link to="/share">分享</router-link></li> 
+        <li @click="num=4" role="presentation" :class="{active:num==4}"><router-link to="/ask">问答</router-link></li> 
+        <li @click="num=5" role="presentation" :class="{active:num==5}"><router-link to="/job">招聘</router-link></li> 
+        <li @click="num=6" role="presentation" :class="{active:num==6}"><router-link to="/dev">客户端招聘</router-link></li>
         </ul>
         `,
         data() {
             return {
-                curr:1
+                curr: 1,
+                num:1
             }
         },
-        methods:{
-            get(){
+        methods: {
+            get() {
                 console.log(this.curr);
             }
         }
@@ -349,7 +219,7 @@
     const cnodeList = {
         name: "cnodeList",
         template: `
-        <li class="list-group-item items" >
+        <router-link :to="'/details/'+list.id" class="list-group-item items" >
             <img :src="list.author.avatar_url" width="30px" height="30px" class="imgs">
             <span class="page-view">
                 {{list.reply_count}}/{{list.visit_count}}
@@ -365,7 +235,7 @@
             <span class="times">
                 {{list.last_reply_at|getTime}}
             </span>
-        </li>
+        </router-link>
         `,
         props: {
             list: {
@@ -426,45 +296,29 @@
             }
         }
     }
-    
+
 
     //组件统一注册
     const allCom = [cnodeLeft, cnodeRight, cnodeHead, cnodeHeadNav, cnodeItem, cnodeList, cnodeFoot]
     allCom.forEach(value => Vue.component(value.name, value));
 
 
-//配置路由
+    //配置路由
     const routes = [{
-            path: "/all",
-            component:cnodeBoxAll
+            path: "/:tab",
+            component: cnodeBox
         },
         {
-            path: "/good",
-            component:cnodeBoxGood
-        },
-        {
-            path: "/share",
-            component:cnodeBoxShare
-        },
-        {
-            path: "/ask",
-            component:cnodeBoxAsk
-        },
-        {
-            path: "/job",
-            component:cnodeBoxJob
-        },
-        {
-            path: "/myjob",
-            component:cnodeBoxMyJob
+            path: "/details/:id",
+            component: cnodeDetails
         },
         {
             path: "*",
             redirect: "/all"
-        }
+        },
     ]
-   
-//路由使用
+
+    //路由使用
     const router = new VueRouter({
         routes
     })
